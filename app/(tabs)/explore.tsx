@@ -8,8 +8,14 @@ import {
   Modal,
   Linking,
   Alert,
+  Platform,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { WebView } from "react-native-webview";
+import { Asset } from "expo-asset";
+import * as FileSystem from "expo-file-system";
+import * as IntentLauncher from "expo-intent-launcher";
 import { Colors, Fonts } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -18,32 +24,15 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 const BOOKS = [
   {
     id: "1",
-    title: "The Noble Truths",
-    description: "A comprehensive guide to the Four Noble Truths.",
-    content: `
-      THE FOUR NOBLE TRUTHS
-      
-      The Truth of Suffering (Dukkha)
-      ...
-      The Truth of the Cause of Suffering (Samudaya)
-      ...
-      The Truth of the End of Suffering (Nirodha)
-      ...
-      The Truth of the Path (Magga)
-      ...
-      (This is a placeholder for the book content. In a real app, this could be a PDF or longer text.)
-    `,
+    title: "The Handbook",
+    description: "A comprehensive guide.",
+    file: require("@/assets/books/handbook.pdf"),
   },
   {
     id: "2",
-    title: "Mindfulness of Breathing",
-    description: "Instructions on Anapanasati meditation.",
-    content: `
-      MINDFULNESS OF BREATHING
-      
-      Breathing in long, he discerns, 'I am breathing in long'; or breathing out long, he discerns, 'I am breathing out long.'
-      ...
-    `,
+    title: "Only One Way",
+    description: "A path to enlightenment.",
+    file: require("@/assets/books/only_one_way.pdf"),
   },
 ];
 
@@ -53,23 +42,47 @@ export default function ExploreScreen() {
   const [selectedBook, setSelectedBook] = useState<{
     id: string;
     title: string;
-    content: string;
+    file: any;
   } | null>(null);
+  const [loadingAndroid, setLoadingAndroid] = useState(false);
 
-  const handleRead = (book: (typeof BOOKS)[0]) => {
-    setSelectedBook(book);
+  const handleRead = async (book: (typeof BOOKS)[0]) => {
+    if (Platform.OS === "android") {
+      // Android: Open in System Viewer to handle large files and avoid crashes
+      setLoadingAndroid(true);
+      try {
+        const asset = Asset.fromModule(book.file);
+        await asset.downloadAsync();
+        const contentUri = await FileSystem.getContentUriAsync(
+          asset.localUri || asset.uri
+        );
+        await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+          data: contentUri,
+          flags: 1,
+          type: "application/pdf",
+        });
+      } catch (e) {
+        console.log("Error opening PDF on Android:", e);
+        Alert.alert("Error", "Could not open the book.");
+      } finally {
+        setLoadingAndroid(false);
+      }
+    } else {
+      // iOS: Use In-App WebView (Supports PDF natively and efficiently)
+      setSelectedBook(book);
+    }
   };
 
-  const handleRequestDownload = () => {
+  const handleRequestDownload = (title: string) => {
     Alert.alert(
       "Request Download",
-      "Please email us to request a copy of this book.",
+      `Please email us to request a copy of "${title}".`,
       [
         {
           text: "Email Request",
           onPress: () =>
             Linking.openURL(
-              "mailto:htoomyatnyinyi@gmail.com?subject=Book Download Request"
+              `mailto:htoomyatnyinyi@gmail.com?subject=Book Download Request: ${title}`
             ),
         },
         { text: "Cancel", style: "cancel" },
@@ -117,16 +130,21 @@ export default function ExploreScreen() {
                   { backgroundColor: theme.secondary },
                 ]}
                 onPress={() => handleRead(book)}
+                disabled={loadingAndroid}
               >
-                <Text style={styles.buttonText}>Read Now</Text>
+                {loadingAndroid ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Read Now</Text>
+                )}
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.requestButton, { borderColor: theme.icon }]}
-                onPress={handleRequestDownload}
+                onPress={() => handleRequestDownload(book.title)}
               >
                 <Text style={[styles.requestText, { color: theme.icon }]}>
-                  Request Download
+                  Request PDF
                 </Text>
               </TouchableOpacity>
             </View>
@@ -134,7 +152,7 @@ export default function ExploreScreen() {
         ))}
       </ScrollView>
 
-      {/* Reading Modal */}
+      {/* Reading Modal (iOS only) */}
       <Modal
         visible={!!selectedBook}
         animationType="slide"
@@ -166,11 +184,16 @@ export default function ExploreScreen() {
             </Text>
             <View style={{ width: 40 }} />
           </View>
-          <ScrollView style={styles.modalContent}>
-            <Text style={[styles.bookText, { color: theme.text }]}>
-              {selectedBook?.content}
-            </Text>
-          </ScrollView>
+          <View style={styles.modalContent}>
+            {selectedBook && (
+              <WebView
+                style={{ flex: 1 }}
+                source={selectedBook.file}
+                originWhitelist={["*"]}
+                scalesPageToFit={true}
+              />
+            )}
+          </View>
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
