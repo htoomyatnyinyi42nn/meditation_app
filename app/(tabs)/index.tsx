@@ -1,27 +1,30 @@
 import React from "react";
-import { StyleSheet, View, Switch, Text, ScrollView } from "react-native";
+import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import MeditationTimer from "@/components/MeditationTimer";
 import AudioController from "@/components/AudioController";
-import { RootState } from "@/store/store";
-import { toggleDhammaAudio, setVolume } from "@/store/audioSlice";
-import { setIntervalTime } from "@/store/timerSlice";
+import MeditationTimer from "@/components/MeditationTimer";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { setVolume, toggleDhammaAudio } from "@/store/audioSlice";
+import { RootState } from "@/store/store";
+import { setIntervalTime } from "@/store/timerSlice";
+import Slider from "@react-native-community/slider";
 
 export default function HomeScreen() {
   const dispatch = useDispatch();
   const { enableDhammaAudio, volume } = useSelector(
-    (state: RootState) => state.audio
+    (state: RootState) => state.audio,
   );
   const { interval, isRunning } = useSelector(
-    (state: RootState) => state.timer
+    (state: RootState) => state.timer,
   );
 
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+
+  // console.log("volume", volume);
 
   return (
     <SafeAreaView
@@ -59,7 +62,7 @@ export default function HomeScreen() {
               <Text
                 style={[
                   styles.intervalOption,
-                  interval === 1 && {
+                  interval === 30 && {
                     color: theme.secondary,
                     fontWeight: "bold",
                   },
@@ -91,17 +94,55 @@ export default function HomeScreen() {
                 Dhamma Audio
               </Text>
               <Text style={[styles.settingDescription, { color: theme.icon }]}>
-                Play guiding audio
+                အာနာပါနသမထပိုင်း လမ်းညွန် အသံဖိုင်
               </Text>
             </View>
+
             <Switch
               value={enableDhammaAudio}
               onValueChange={() => dispatch(toggleDhammaAudio())}
               trackColor={{ false: theme.icon, true: theme.secondary }}
-              thumbColor={"#fff"}
+              thumbColor={"#078fffff"}
+            />
+          </View>
+          <View style={{ width: "100%", alignItems: "center" }}>
+            <Text>Volume: {Math.round(volume * 100)}%</Text>
+
+            <Slider
+              style={{ width: 300, height: 40 }}
+              minimumValue={0}
+              maximumValue={1}
+              step={0.01} // This controls the granularity
+              value={volume}
+              onValueChange={(value) => dispatch(setVolume(value))}
+              minimumTrackTintColor="#1EB1FC"
+              maximumTrackTintColor="#d3d3d3"
+              thumbTintColor="#1EB1FC"
             />
           </View>
         </View>
+        {/* <View>
+          <TouchableOpacity
+            onPressIn={() =>
+              dispatch(setVolume(parseFloat((volume + 0.1).toFixed(1))))
+            }
+          >
+            <View>
+              <Text>{volume}</Text>
+              <Text>+</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPressIn={() =>
+              dispatch(setVolume(parseFloat((volume - 0.1).toFixed(1))))
+            }
+          >
+            <View>
+              <Text>{volume}</Text>
+              <Text>-</Text>
+            </View>
+          </TouchableOpacity>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );

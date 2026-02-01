@@ -1,3 +1,4 @@
+import { store } from "@/store/store";
 import {
   DarkTheme,
   DefaultTheme,
@@ -7,7 +8,6 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { Provider } from "react-redux";
-import { store } from "@/store/store";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 

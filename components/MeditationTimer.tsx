@@ -1,22 +1,16 @@
-import React, { useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/store/store";
-import {
-  startTimer,
-  stopTimer,
-  resetTimer,
-  tick,
-  finishSession,
-} from "@/store/timerSlice";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { RootState } from "@/store/store";
+import { resetTimer, startTimer, stopTimer, tick } from "@/store/timerSlice";
+import React, { useEffect } from "react";
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 
 const { width } = Dimensions.get("window");
 const CIRCLE_SIZE = width * 0.7;
@@ -24,7 +18,7 @@ const CIRCLE_SIZE = width * 0.7;
 export default function MeditationTimer() {
   const dispatch = useDispatch();
   const { currentTime, isRunning, isFinished, interval } = useSelector(
-    (state: RootState) => state.timer
+    (state: RootState) => state.timer,
   );
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -82,8 +76,8 @@ export default function MeditationTimer() {
           {isRunning
             ? "Meditating..."
             : isFinished
-            ? "Session Finished"
-            : "Ready"}
+              ? "Session Finished"
+              : "Ready"}
         </Text>
         <Text style={[styles.intervalText, { color: theme.secondary }]}>
           Bell every {interval}m
