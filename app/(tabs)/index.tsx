@@ -1,27 +1,29 @@
 import React from "react";
-import { StyleSheet, View, Switch, Text, ScrollView } from "react-native";
+import { ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import MeditationTimer from "@/components/MeditationTimer";
 import AudioController from "@/components/AudioController";
-import { RootState } from "@/store/store";
-import { toggleDhammaAudio, setVolume } from "@/store/audioSlice";
-import { setIntervalTime } from "@/store/timerSlice";
+import MeditationTimer from "@/components/MeditationTimer";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { toggleDhammaAudio } from "@/store/audioSlice";
+import { RootState } from "@/store/store";
+import { setIntervalTime } from "@/store/timerSlice";
 
 export default function HomeScreen() {
   const dispatch = useDispatch();
   const { enableDhammaAudio, volume } = useSelector(
-    (state: RootState) => state.audio
+    (state: RootState) => state.audio,
   );
   const { interval, isRunning } = useSelector(
-    (state: RootState) => state.timer
+    (state: RootState) => state.timer,
   );
 
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+
+  console.log("volume", volume);
 
   return (
     <SafeAreaView
