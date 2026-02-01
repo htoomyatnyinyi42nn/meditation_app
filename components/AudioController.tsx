@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { Audio } from "expo-av";
-import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { Audio } from "expo-av";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 export default function AudioController() {
   const { currentTime, interval, isFinished, isRunning } = useSelector(
-    (state: RootState) => state.timer
+    (state: RootState) => state.timer,
   );
   const { enableDhammaAudio, volume } = useSelector(
-    (state: RootState) => state.audio
+    (state: RootState) => state.audio,
   );
 
   const [dhammaSoundObj, setDhammaSoundObj] = useState<Audio.Sound | null>(
-    null
+    null,
   );
 
   // Helper to play bell sound
@@ -20,7 +20,7 @@ export default function AudioController() {
     try {
       console.log(`Playing bell at volume ${volume}`);
       const { sound } = await Audio.Sound.createAsync(
-        require("@/assets/sounds/bell.mp3")
+        require("@/assets/sounds/bell2.mp3"),
       );
       await sound.setVolumeAsync(volume);
       await sound.playAsync();
@@ -47,7 +47,7 @@ export default function AudioController() {
             console.log("Loading Dhamma audio...");
             const { sound } = await Audio.Sound.createAsync(
               require("@/assets/sounds/dhamma.mp3"),
-              { shouldPlay: true, isLooping: true }
+              { shouldPlay: true, isLooping: true },
             );
             await sound.setVolumeAsync(volume * 0.5); // Background volume slightly lower
             soundObj = sound;

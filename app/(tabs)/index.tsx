@@ -7,9 +7,10 @@ import AudioController from "@/components/AudioController";
 import MeditationTimer from "@/components/MeditationTimer";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { toggleDhammaAudio } from "@/store/audioSlice";
+import { setVolume, toggleDhammaAudio } from "@/store/audioSlice";
 import { RootState } from "@/store/store";
 import { setIntervalTime } from "@/store/timerSlice";
+import Slider from "@react-native-community/slider";
 
 export default function HomeScreen() {
   const dispatch = useDispatch();
@@ -23,7 +24,7 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  console.log("volume", volume);
+  // console.log("volume", volume);
 
   return (
     <SafeAreaView
@@ -61,7 +62,7 @@ export default function HomeScreen() {
               <Text
                 style={[
                   styles.intervalOption,
-                  interval === 1 && {
+                  interval === 30 && {
                     color: theme.secondary,
                     fontWeight: "bold",
                   },
@@ -93,17 +94,55 @@ export default function HomeScreen() {
                 Dhamma Audio
               </Text>
               <Text style={[styles.settingDescription, { color: theme.icon }]}>
-                Play guiding audio
+                အာနာပါနသမထပိုင်း လမ်းညွန် အသံဖိုင်
               </Text>
             </View>
+
             <Switch
               value={enableDhammaAudio}
               onValueChange={() => dispatch(toggleDhammaAudio())}
               trackColor={{ false: theme.icon, true: theme.secondary }}
-              thumbColor={"#fff"}
+              thumbColor={"#078fffff"}
+            />
+          </View>
+          <View style={{ width: "100%", alignItems: "center" }}>
+            <Text>Volume: {Math.round(volume * 100)}%</Text>
+
+            <Slider
+              style={{ width: 300, height: 40 }}
+              minimumValue={0}
+              maximumValue={1}
+              step={0.01} // This controls the granularity
+              value={volume}
+              onValueChange={(value) => dispatch(setVolume(value))}
+              minimumTrackTintColor="#1EB1FC"
+              maximumTrackTintColor="#d3d3d3"
+              thumbTintColor="#1EB1FC"
             />
           </View>
         </View>
+        {/* <View>
+          <TouchableOpacity
+            onPressIn={() =>
+              dispatch(setVolume(parseFloat((volume + 0.1).toFixed(1))))
+            }
+          >
+            <View>
+              <Text>{volume}</Text>
+              <Text>+</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPressIn={() =>
+              dispatch(setVolume(parseFloat((volume - 0.1).toFixed(1))))
+            }
+          >
+            <View>
+              <Text>{volume}</Text>
+              <Text>-</Text>
+            </View>
+          </TouchableOpacity>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );
